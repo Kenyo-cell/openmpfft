@@ -4,10 +4,13 @@
 #include <complex.h>
 #include <omp.h>
 
-typedef double complex cplx;
-#define cx_size sizeof(cplx)
 #define true 1
 #define false 0
+#define cx_size sizeof(cplx)
+
+typedef double complex cplx;
+
+static unsigned N;
 
 void show(const char *s, cplx buf[], unsigned n) {
     printf("%s", s);
@@ -20,6 +23,10 @@ void show(const char *s, cplx buf[], unsigned n) {
     printf("\n");
 }
 
+void precalculate(unsigned n) {
+    N = (int) ceil(log2(n));
+}
+
 unsigned _rev(unsigned n, unsigned N) {
     unsigned reversed = 0;
     for (int i = 0; i < N; i++) {
@@ -29,7 +36,6 @@ unsigned _rev(unsigned n, unsigned N) {
 }
 
 unsigned rev(unsigned n) {
-    unsigned N = (int) ceil(log2(n));
     return _rev(n, N);
 }
 
@@ -56,6 +62,7 @@ int _power(unsigned n) {
 
 cplx* _fft(cplx* array, unsigned n, short invert) {
     int power = _power(n);
+    precalculate(n);
     double inverted = invert == true ? -1 : 1;
     cplx *dft = bit_reverse_copy(array, n);
 
@@ -93,7 +100,7 @@ cplx* ifft(cplx* array, unsigned n) {
 }
 
 int main() {
-    unsigned n = pow(2, 27);
+    unsigned n = pow(2, 2);
     cplx *buf = calloc(n, cx_size);
 	for (int i = 0; i < n; i += 4) {
 		buf[i] = 5;
@@ -102,13 +109,13 @@ int main() {
 		buf[i + 3] = -1;
 	}
     
-    // show("Data: ", buf, n);
+    show("Data: ", buf, n);
     cplx* res = fft(buf, n);
-    // show("\nFFT : ", res, n);
+    show("\nFFT : ", res, n);
 
-    // show("\nIFFT : ", ifft(res, n), n);
+    show("\nIFFT : ", ifft(res, n), n);
 
-    ifft(res, n);
+    // ifft(res, n);
 
     return 0;
 }
